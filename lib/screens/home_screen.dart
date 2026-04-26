@@ -6,8 +6,15 @@ import '../widgets/glass_app_bar.dart';
 import '../services/firestore_service.dart';
 import '../models/cart_model.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  String searchQuery = "";
 
   @override
   Widget build(BuildContext context) {
@@ -63,9 +70,32 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
 
-            // --- 2. Category Chips ---
+            // --- 2. Search Bar Section ---
             Padding(
-              padding: const EdgeInsets.symmetric(vertical: 15.0),
+              padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+              child: TextField(
+                onChanged: (value) {
+                  // මෙතනදී තමයි search වෙන්නේ
+                  setState(() => searchQuery = value.toLowerCase());
+                },
+                style: const TextStyle(color: Colors.white),
+                decoration: InputDecoration(
+                  hintText: "Search your drink...",
+                  hintStyle: const TextStyle(color: Colors.white54),
+                  prefixIcon: const Icon(Icons.search, color: Colors.amber),
+                  filled: true,
+                  fillColor: Colors.white.withOpacity(0.05),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(15),
+                    borderSide: BorderSide.none,
+                  ),
+                ),
+              ),
+            ),
+
+            // --- 3. Category Chips ---
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 10.0),
               child: SizedBox(
                 height: 40,
                 child: ListView(
@@ -81,7 +111,7 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
 
-            // --- 3. AI Recommendation Box ---
+            // --- 4. AI Recommendation Box ---
             Container(
               margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
               padding: const EdgeInsets.all(15),
@@ -116,7 +146,7 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
 
-            // --- 4. Product Grid Title ---
+            // --- 5. Product Grid Title ---
             Padding(
               padding: const EdgeInsets.all(15.0),
               child: Text(
@@ -125,7 +155,7 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
 
-            // --- 5. Product Grid (Firestore Stream) ---
+            // --- 6. Product Grid (Firestore Stream + Search Filter) ---
             StreamBuilder<QuerySnapshot>(
               stream: firestoreService.getDrinks(),
               builder: (context, snapshot) {
@@ -143,12 +173,19 @@ class HomeScreen extends StatelessWidget {
                   );
                 }
 
-                final docs = snapshot.data!.docs;
+                final docs = snapshot.data!.docs.where((doc) {
+                  final name = doc['name'].toString().toLowerCase();
+                  return name.contains(searchQuery);
+                }).toList();
+
                 if (docs.isEmpty) {
                   return const Center(
-                    child: Text(
-                      "Database eke drinks naha mchan!",
-                      style: TextStyle(color: Colors.white54),
+                    child: Padding(
+                      padding: EdgeInsets.all(20.0),
+                      child: Text(
+                        "Oya හොයන බීම එක නෑ මචං!",
+                        style: TextStyle(color: Colors.white54),
+                      ),
                     ),
                   );
                 }
@@ -183,7 +220,6 @@ class HomeScreen extends StatelessWidget {
           ],
         ),
       ),
-      // --- FAB ADD KALA ---
       floatingActionButton: FloatingActionButton(
         backgroundColor: Colors.amber,
         onPressed: () => Navigator.pushNamed(context, '/cart'),

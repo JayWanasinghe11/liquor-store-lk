@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:liquor_store_lk/screens/admin_orders_screen.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart'; 
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'models/cart_model.dart';
 import 'screens/age_verification_screen.dart';
 import 'screens/home_screen.dart';
@@ -11,9 +12,7 @@ import 'screens/cart_screen.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-
   await dotenv.load(fileName: ".env");
-
 
   await Firebase.initializeApp(
     options: FirebaseOptions(
@@ -29,9 +28,7 @@ void main() async {
 
   runApp(
     MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => CartProvider()),
-      ],
+      providers: [ChangeNotifierProvider(create: (_) => CartProvider())],
       child: const SupiriLiquorApp(),
     ),
   );
@@ -55,6 +52,7 @@ class SupiriLiquorApp extends StatelessWidget {
         '/home': (context) => const HomeScreen(),
         '/chat': (context) => const ChatScreen(),
         '/cart': (context) => const CartScreen(),
+        '/admin': (context) => const AdminOrdersScreen(),
       },
     );
   }
