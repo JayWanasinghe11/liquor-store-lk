@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
+import 'package:carousel_slider/carousel_slider.dart';
 import '../widgets/glass_app_bar.dart';
 import '../services/firestore_service.dart';
 import '../models/cart_model.dart';
@@ -14,8 +15,13 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  
   String searchQuery = "";
+
+  final List<String> imgList = [
+    'assets/images/banner1.jpg',
+    'assets/images/banner2.jpg',
+    'assets/images/banner3.jpg',
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -23,66 +29,82 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return Scaffold(
       backgroundColor: const Color(0xFF0F0F0F), // Deep Black
-      // appBar: const GlassAppBar(), // Meka ain kala mchan
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // --- 1. Banner Section with Profile & Admin Entry ---
+            // --- 1. Banner Section with Animated Carousel (Local Assets) ---
             Stack(
               children: [
-                Container(
-                  height: 220,
-                  width: double.infinity,
-                  decoration: const BoxDecoration(
-                    image: DecorationImage(
-                      image: NetworkImage(
-                        'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?q=80&w=2070',
-                      ),
-                      fit: BoxFit.cover,
+                CarouselSlider(
+                  options: CarouselOptions(
+                    height: 220,
+                    viewportFraction: 1.0,
+                    enlargeCenterPage: false,
+                    autoPlay: true,
+                    autoPlayInterval: const Duration(seconds: 4),
+                    autoPlayAnimationDuration: const Duration(
+                      milliseconds: 800,
                     ),
+                    autoPlayCurve: Curves.fastOutSlowIn,
                   ),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          Colors.black.withOpacity(0.9),
-                          Colors.transparent,
-                        ],
-                        begin: Alignment.bottomCenter,
-                        end: Alignment.topCenter,
-                      ),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(20.0),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            "Premium Collections",
-                            style: GoogleFonts.oswald(
-                              color: Colors.amber,
-                              fontSize: 24,
+                  items: imgList
+                      .map(
+                        (item) => Container(
+                          width: double.infinity,
+                          decoration: BoxDecoration(
+                            image: DecorationImage(
+                              image: AssetImage(
+                                item,
+                              ), // මෙතන දැන් AssetImage වැඩ මචං
+                              fit: BoxFit.cover,
                             ),
                           ),
-                          const Text(
-                            "Get your favorite drinks delivered to your doorstep.",
-                            style: TextStyle(color: Colors.white70),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [
+                                  Colors.black.withOpacity(0.9),
+                                  Colors.transparent,
+                                ],
+                                begin: Alignment.bottomCenter,
+                                end: Alignment.topCenter,
+                              ),
+                            ),
                           ),
-                        ],
+                        ),
+                      )
+                      .toList(),
+                ),
+
+                // Text Overlay
+                Positioned(
+                  bottom: 20,
+                  left: 20,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "Premium Collections",
+                        style: GoogleFonts.oswald(
+                          color: Colors.amber,
+                          fontSize: 24,
+                        ),
                       ),
-                    ),
+                      const Text(
+                        "Get your favorite drinks delivered to your doorstep.",
+                        style: TextStyle(color: Colors.white70),
+                      ),
+                    ],
                   ),
                 ),
 
-                // --- PROFILE / LOGIN ICON (DIRECT NAVIGATION) ---
+                // Profile/Admin Entry (Direct Navigation)
                 Positioned(
-                  top: 40, 
+                  top: 40,
                   right: 15,
                   child: GestureDetector(
                     onTap: () {
-                      
                       Navigator.pushNamed(context, '/admin_login');
                     },
                     child: Container(
@@ -104,7 +126,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
 
-                // --- HIDDEN ADMIN ENTRY (TOP LEFT) ---
+                // Hidden Admin Entry (Top Left)
                 Positioned(
                   left: 10,
                   top: 40,
@@ -199,7 +221,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
 
-            // --- 5. Product Grid Title ---
+            // --- 5. Product Grid (Filtered Stream) ---
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
               child: Text(
@@ -208,40 +230,33 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
 
-            // --- 6. Product Grid (Filtered) ---
             StreamBuilder<QuerySnapshot>(
               stream: firestoreService.getDrinks(),
               builder: (context, snapshot) {
-                if (snapshot.hasError) {
+                if (snapshot.hasError)
                   return const Center(
-                    child: Text(
-                      "Error ekak awa mchan!",
-                      style: TextStyle(color: Colors.red),
-                    ),
+                    child: Text("Error!", style: TextStyle(color: Colors.red)),
                   );
-                }
-                if (snapshot.connectionState == ConnectionState.waiting) {
+                if (snapshot.connectionState == ConnectionState.waiting)
                   return const Center(
                     child: CircularProgressIndicator(color: Colors.amber),
                   );
-                }
 
                 final docs = snapshot.data!.docs.where((doc) {
                   final name = doc['name'].toString().toLowerCase();
                   return name.contains(searchQuery);
                 }).toList();
 
-                if (docs.isEmpty) {
+                if (docs.isEmpty)
                   return const Center(
                     child: Padding(
                       padding: EdgeInsets.all(20.0),
                       child: Text(
-                        "Oya හොයන බීම එක නෑ මචං!",
+                        "Not found mchan!",
                         style: TextStyle(color: Colors.white54),
                       ),
                     ),
                   );
-                }
 
                 return GridView.builder(
                   shrinkWrap: true,
@@ -256,19 +271,18 @@ class _HomeScreenState extends State<HomeScreen> {
                   itemCount: docs.length,
                   itemBuilder: (context, index) {
                     final data = docs[index].data() as Map<String, dynamic>;
-                    final docId = docs[index].id;
                     return _buildProductCard(
                       context,
-                      docId,
-                      data['name'] ?? 'Unknown',
-                      data['price']?.toString() ?? '0.00',
-                      data['imageUrl'] ?? '',
+                      docs[index].id,
+                      data['name'],
+                      data['price'].toString(),
+                      data['imageUrl'],
                     );
                   },
                 );
               },
             ),
-            const SizedBox(height: 80), // FAB space
+            const SizedBox(height: 80),
           ],
         ),
       ),
@@ -376,14 +390,6 @@ class _HomeScreenState extends State<HomeScreen> {
                         name,
                         double.parse(price.replaceAll(',', '')),
                         imgUrl,
-                      );
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text("Added to cart!"),
-                          duration: Duration(seconds: 1),
-                          backgroundColor: Colors.amber,
-                          behavior: SnackBarBehavior.floating,
-                        ),
                       );
                     },
                     style: ElevatedButton.styleFrom(
