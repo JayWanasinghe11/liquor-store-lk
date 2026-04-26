@@ -14,6 +14,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  
   String searchQuery = "";
 
   @override
@@ -22,60 +23,108 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return Scaffold(
       backgroundColor: const Color(0xFF0F0F0F), // Deep Black
-      appBar: const GlassAppBar(),
+      // appBar: const GlassAppBar(), // Meka ain kala mchan
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // --- 1. Banner Section ---
-            Container(
-              height: 200,
-              width: double.infinity,
-              decoration: const BoxDecoration(
-                image: DecorationImage(
-                  image: NetworkImage(
-                    'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?q=80&w=2070',
+            // --- 1. Banner Section with Profile & Admin Entry ---
+            Stack(
+              children: [
+                Container(
+                  height: 220,
+                  width: double.infinity,
+                  decoration: const BoxDecoration(
+                    image: DecorationImage(
+                      image: NetworkImage(
+                        'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?q=80&w=2070',
+                      ),
+                      fit: BoxFit.cover,
+                    ),
                   ),
-                  fit: BoxFit.cover,
-                ),
-              ),
-              child: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [Colors.black.withOpacity(0.8), Colors.transparent],
-                    begin: Alignment.bottomCenter,
-                    end: Alignment.topCenter,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          Colors.black.withOpacity(0.9),
+                          Colors.transparent,
+                        ],
+                        begin: Alignment.bottomCenter,
+                        end: Alignment.topCenter,
+                      ),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(20.0),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "Premium Collections",
+                            style: GoogleFonts.oswald(
+                              color: Colors.amber,
+                              fontSize: 24,
+                            ),
+                          ),
+                          const Text(
+                            "Get your favorite drinks delivered to your doorstep.",
+                            style: TextStyle(color: Colors.white70),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
-                child: Padding(
-                  padding: const EdgeInsets.all(20.0),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "Premium Collections",
-                        style: GoogleFonts.oswald(
-                          color: Colors.amber,
-                          fontSize: 24,
+
+                // --- PROFILE / LOGIN ICON (DIRECT NAVIGATION) ---
+                Positioned(
+                  top: 40, 
+                  right: 15,
+                  child: GestureDetector(
+                    onTap: () {
+                      
+                      Navigator.pushNamed(context, '/admin_login');
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(0.4),
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: Colors.amber.withOpacity(0.5),
+                          width: 1,
                         ),
                       ),
-                      const Text(
-                        "Get your favorite drinks delivered to your doorstep.",
-                        style: TextStyle(color: Colors.white70),
+                      child: const Icon(
+                        Icons.person_outline,
+                        color: Colors.amber,
+                        size: 24,
                       ),
-                    ],
+                    ),
                   ),
                 ),
-              ),
+
+                // --- HIDDEN ADMIN ENTRY (TOP LEFT) ---
+                Positioned(
+                  left: 10,
+                  top: 40,
+                  child: GestureDetector(
+                    onTap: () => Navigator.pushNamed(context, '/admin_login'),
+                    child: Container(
+                      width: 40,
+                      height: 40,
+                      color: Colors.transparent,
+                    ),
+                  ),
+                ),
+              ],
             ),
 
             // --- 2. Search Bar Section ---
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
               child: TextField(
                 onChanged: (value) {
-                  // මෙතනදී තමයි search වෙන්නේ
                   setState(() => searchQuery = value.toLowerCase());
                 },
                 style: const TextStyle(color: Colors.white),
@@ -95,11 +144,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
             // --- 3. Category Chips ---
             Padding(
-              padding: const EdgeInsets.symmetric(vertical: 10.0),
+              padding: const EdgeInsets.symmetric(vertical: 5.0),
               child: SizedBox(
                 height: 40,
                 child: ListView(
                   scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
                   children: [
                     _buildCategoryChip("Whisky", true),
                     _buildCategoryChip("Beer", false),
@@ -113,7 +163,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
             // --- 4. AI Recommendation Box ---
             Container(
-              margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+              margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
               padding: const EdgeInsets.all(15),
               decoration: BoxDecoration(
                 color: Colors.amber.withOpacity(0.1),
@@ -139,7 +189,10 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     child: const Text(
                       "Ask",
-                      style: TextStyle(color: Colors.black),
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ],
@@ -148,14 +201,14 @@ class _HomeScreenState extends State<HomeScreen> {
 
             // --- 5. Product Grid Title ---
             Padding(
-              padding: const EdgeInsets.all(15.0),
+              padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
               child: Text(
                 "Popular Drinks",
                 style: GoogleFonts.oswald(color: Colors.white, fontSize: 20),
               ),
             ),
 
-            // --- 6. Product Grid (Firestore Stream + Search Filter) ---
+            // --- 6. Product Grid (Filtered) ---
             StreamBuilder<QuerySnapshot>(
               stream: firestoreService.getDrinks(),
               builder: (context, snapshot) {
@@ -204,7 +257,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   itemBuilder: (context, index) {
                     final data = docs[index].data() as Map<String, dynamic>;
                     final docId = docs[index].id;
-
                     return _buildProductCard(
                       context,
                       docId,
@@ -216,7 +268,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 );
               },
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 80), // FAB space
           ],
         ),
       ),
@@ -230,12 +282,16 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildCategoryChip(String label, bool isSelected) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+      padding: const EdgeInsets.symmetric(horizontal: 5.0),
       child: Chip(
         backgroundColor: isSelected ? Colors.amber : Colors.grey[900],
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         label: Text(
           label,
-          style: TextStyle(color: isSelected ? Colors.black : Colors.white),
+          style: TextStyle(
+            color: isSelected ? Colors.black : Colors.white,
+            fontSize: 12,
+          ),
         ),
       ),
     );
@@ -297,17 +353,22 @@ class _HomeScreenState extends State<HomeScreen> {
                   style: const TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
-                    fontSize: 16,
+                    fontSize: 14,
                   ),
                 ),
                 const SizedBox(height: 5),
                 Text(
                   "LKR $price",
-                  style: const TextStyle(color: Colors.amber, fontSize: 14),
+                  style: const TextStyle(
+                    color: Colors.amber,
+                    fontSize: 13,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 8),
                 SizedBox(
                   width: double.infinity,
+                  height: 35,
                   child: ElevatedButton(
                     onPressed: () {
                       Provider.of<CartProvider>(context, listen: false).addItem(
@@ -316,11 +377,10 @@ class _HomeScreenState extends State<HomeScreen> {
                         double.parse(price.replaceAll(',', '')),
                         imgUrl,
                       );
-
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text("$name added to cart!"),
-                          duration: const Duration(seconds: 1),
+                        const SnackBar(
+                          content: Text("Added to cart!"),
+                          duration: Duration(seconds: 1),
                           backgroundColor: Colors.amber,
                           behavior: SnackBarBehavior.floating,
                         ),
@@ -330,10 +390,13 @@ class _HomeScreenState extends State<HomeScreen> {
                       backgroundColor: Colors.white.withOpacity(0.05),
                       padding: EdgeInsets.zero,
                       side: const BorderSide(color: Colors.amber, width: 0.5),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
                     ),
                     child: const Text(
                       "Add to Cart",
-                      style: TextStyle(color: Colors.amber, fontSize: 12),
+                      style: TextStyle(color: Colors.amber, fontSize: 11),
                     ),
                   ),
                 ),
