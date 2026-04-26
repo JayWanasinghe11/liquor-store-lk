@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:liquor_store_lk/screens/admin_orders_screen.dart';
+import 'package:liquor_store_lk/screens/dmin_login_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'models/cart_model.dart';
@@ -53,6 +54,7 @@ class SupiriLiquorApp extends StatelessWidget {
         '/chat': (context) => const ChatScreen(),
         '/cart': (context) => const CartScreen(),
         '/admin': (context) => const AdminOrdersScreen(),
+        '/admin_login': (context) => const AdminLoginScreen(),
       },
     );
   }
