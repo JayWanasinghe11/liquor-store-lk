@@ -16,6 +16,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   String searchQuery = "";
+  String selectedCategory = "All";
 
   final List<String> imgList = [
     'assets/images/banner1.jpg',
@@ -23,17 +24,18 @@ class _HomeScreenState extends State<HomeScreen> {
     'assets/images/banner3.jpg',
   ];
 
+  final List<String> categories = ["All", "Whisky", "Beer", "Gin", "Wine", "Vodka"];
+
   @override
   Widget build(BuildContext context) {
     final FirestoreService firestoreService = FirestoreService();
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0F0F0F), // Deep Black
+      backgroundColor: const Color(0xFF0F0F0F),
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // --- 1. Banner Section with Animated Carousel (Local Assets) ---
             Stack(
               children: [
                 CarouselSlider(
@@ -56,7 +58,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             image: DecorationImage(
                               image: AssetImage(
                                 item,
-                              ), // මෙතන දැන් AssetImage වැඩ මචං
+                              ), 
                               fit: BoxFit.cover,
                             ),
                           ),
@@ -77,7 +79,6 @@ class _HomeScreenState extends State<HomeScreen> {
                       .toList(),
                 ),
 
-                // Text Overlay
                 Positioned(
                   bottom: 20,
                   left: 20,
@@ -99,7 +100,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
 
-                // Profile/Admin Entry (Direct Navigation)
                 Positioned(
                   top: 40,
                   right: 15,
@@ -126,7 +126,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
 
-                // Hidden Admin Entry (Top Left)
                 Positioned(
                   left: 10,
                   top: 40,
@@ -142,7 +141,6 @@ class _HomeScreenState extends State<HomeScreen> {
               ],
             ),
 
-            // --- 2. Search Bar Section ---
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
               child: TextField(
@@ -164,26 +162,22 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
 
-            // --- 3. Category Chips ---
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 5.0),
               child: SizedBox(
                 height: 40,
-                child: ListView(
+                child: ListView.builder(
                   scrollDirection: Axis.horizontal,
                   padding: const EdgeInsets.symmetric(horizontal: 10),
-                  children: [
-                    _buildCategoryChip("Whisky", true),
-                    _buildCategoryChip("Beer", false),
-                    _buildCategoryChip("Gin", false),
-                    _buildCategoryChip("Wine", false),
-                    _buildCategoryChip("Vodka", false),
-                  ],
+                  itemCount: categories.length,
+                  itemBuilder: (context, index) {
+                    final category = categories[index];
+                    return _buildCategoryChip(category, selectedCategory == category);
+                  },
                 ),
               ),
             ),
 
-            // --- 4. AI Recommendation Box ---
             Container(
               margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
               padding: const EdgeInsets.all(15),
@@ -221,11 +215,10 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
 
-            // --- 5. Product Grid (Filtered Stream) ---
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
               child: Text(
-                "Popular Drinks",
+                selectedCategory == "All" ? "Popular Drinks" : "$selectedCategory Collections",
                 style: GoogleFonts.oswald(color: Colors.white, fontSize: 20),
               ),
             ),
@@ -243,8 +236,14 @@ class _HomeScreenState extends State<HomeScreen> {
                   );
 
                 final docs = snapshot.data!.docs.where((doc) {
-                  final name = doc['name'].toString().toLowerCase();
-                  return name.contains(searchQuery);
+                  final data = doc.data() as Map<String, dynamic>;
+                  final name = data['name']?.toString().toLowerCase() ?? '';
+                  final category = data.containsKey('category') ? data['category'].toString() : '';
+
+                  bool matchesSearch = name.contains(searchQuery);
+                  bool matchesCategory = selectedCategory == "All" || category.toLowerCase() == selectedCategory.toLowerCase();
+
+                  return matchesSearch && matchesCategory;
                 }).toList();
 
                 if (docs.isEmpty)
@@ -274,9 +273,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     return _buildProductCard(
                       context,
                       docs[index].id,
-                      data['name'],
-                      data['price'].toString(),
-                      data['imageUrl'],
+                      data['name'] ?? 'Unknown',
+                      data['price']?.toString() ?? '0.00',
+                      data['imageUrl'] ?? '',
                     );
                   },
                 );
@@ -297,16 +296,21 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildCategoryChip(String label, bool isSelected) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 5.0),
-      child: Chip(
-        backgroundColor: isSelected ? Colors.amber : Colors.grey[900],
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        label: Text(
-          label,
-          style: TextStyle(
-            color: isSelected ? Colors.black : Colors.white,
-            fontSize: 12,
-          ),
+      child: ChoiceChip(
+        label: Text(label),
+        selected: isSelected,
+        selectedColor: Colors.amber,
+        backgroundColor: Colors.grey[900],
+        labelStyle: TextStyle(
+          color: isSelected ? Colors.black : Colors.white,
+          fontSize: 12,
         ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        onSelected: (bool selected) {
+          setState(() {
+            selectedCategory = label;
+          });
+        },
       ),
     );
   }
@@ -339,12 +343,12 @@ class _HomeScreenState extends State<HomeScreen> {
                       width: double.infinity,
                       errorBuilder: (context, error, stackTrace) =>
                           const Center(
-                            child: Icon(
-                              Icons.wine_bar,
-                              color: Colors.amber,
-                              size: 50,
-                            ),
-                          ),
+                        child: Icon(
+                          Icons.wine_bar,
+                          color: Colors.amber,
+                          size: 50,
+                        ),
+                      ),
                     )
                   : const Center(
                       child: Icon(
