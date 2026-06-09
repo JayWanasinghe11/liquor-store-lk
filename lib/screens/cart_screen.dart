@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/cart_model.dart';
-import 'checkout_screen.dart';
 
 class CartScreen extends StatelessWidget {
   const CartScreen({super.key});
@@ -23,7 +22,7 @@ class CartScreen extends StatelessWidget {
       body: cart.items.isEmpty
           ? const Center(
               child: Text(
-                "Mchan, cart eka his ne! Ekak add karamu.",
+                "Your cart is empty! Add some items to checkout.",
                 style: TextStyle(color: Colors.white54, fontSize: 16),
               ),
             )
@@ -49,7 +48,6 @@ class CartScreen extends StatelessWidget {
                         ),
                         child: Row(
                           children: [
-                            
                             ClipRRect(
                               borderRadius: BorderRadius.circular(10),
                               child: Image.network(
@@ -57,18 +55,15 @@ class CartScreen extends StatelessWidget {
                                 width: 60,
                                 height: 60,
                                 fit: BoxFit.cover,
-                                
                                 errorBuilder: (context, error, stackTrace) =>
                                     const Icon(
-                                      Icons.wine_bar,
-                                      color: Colors.amber,
-                                      size: 30,
-                                    ),
+                                  Icons.wine_bar,
+                                  color: Colors.amber,
+                                  size: 30,
+                                ),
                               ),
                             ),
                             const SizedBox(width: 15),
-
-                            
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -94,10 +89,7 @@ class CartScreen extends StatelessWidget {
                                 ],
                               ),
                             ),
-
                             const SizedBox(width: 10),
-
-                            // Quantity kalla
                             Text(
                               "x${item.quantity}",
                               style: const TextStyle(
@@ -105,8 +97,6 @@ class CartScreen extends StatelessWidget {
                                 fontSize: 14,
                               ),
                             ),
-
-                            // Delete button eka
                             IconButton(
                               icon: const Icon(
                                 Icons.delete_outline,
@@ -121,8 +111,6 @@ class CartScreen extends StatelessWidget {
                     },
                   ),
                 ),
-
-                // Total and Checkout Section
                 Container(
                   padding: const EdgeInsets.all(25),
                   decoration: BoxDecoration(
@@ -156,12 +144,7 @@ class CartScreen extends StatelessWidget {
                         height: 50,
                         child: ElevatedButton(
                           onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const CheckoutScreen(),
-                              ),
-                            );
+                            Navigator.pushNamed(context, '/checkout');
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.amber,

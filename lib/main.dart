@@ -9,6 +9,8 @@ import 'screens/age_verification_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/chat_screen.dart';
 import 'screens/cart_screen.dart';
+import 'screens/order_history_screen.dart';
+import 'screens/checkout_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -55,6 +57,10 @@ class SupiriLiquorApp extends StatelessWidget {
         '/cart': (context) => const CartScreen(),
         '/admin': (context) => const AdminOrdersScreen(),
         '/admin_login': (context) => const AdminLoginScreen(),
+        '/order_history': (context) => const OrderHistoryScreen(),
+        
+        // Removed 'const' from here to fix the compilation error
+        '/checkout': (context) => const CheckoutScreen(),
       },
     );
   }
